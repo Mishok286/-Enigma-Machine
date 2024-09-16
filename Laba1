@@ -1,0 +1,87 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#define ALPHABET_SIZE 26
+
+// Функція для зсуву Цезаря
+char caesar_shift(char letter, int shift) {
+    return 'A' + (letter - 'A' + shift) % ALPHABET_SIZE;
+}
+
+// Функція для зворотного зсуву Цезаря
+char reverse_caesar_shift(char letter, int shift) {
+    return 'A' + (letter - 'A' - shift + ALPHABET_SIZE) % ALPHABET_SIZE;
+}
+
+// Функція для заміщення символів за ротором
+char substitute(char letter, const char* rotor) {
+    return rotor[letter - 'A'];
+}
+
+// Функція для зворотного заміщення символів за ротором
+char reverse_substitute(char letter, const char* rotor) {
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        if (rotor[i] == letter) {
+            return 'A' + i;
+        }
+    }
+    return letter;  // Якщо не знайдено відповідності
+}
+
+// Основна функція
+int main() {
+    char operation[10];
+    scanf("%s", operation);
+    int pseudo_random_number;
+    scanf("%d", &pseudo_random_number);
+    
+    // Читання роторів
+    char rotor1[ALPHABET_SIZE + 1];
+    char rotor2[ALPHABET_SIZE + 1];
+    char rotor3[ALPHABET_SIZE + 1];
+    scanf("%s", rotor1);
+    scanf("%s", rotor2);
+    scanf("%s", rotor3);
+
+    // Читання повідомлення
+    char message[50];
+    scanf("%s", message);
+
+    int message_len = strlen(message);
+    char result[50];
+
+    // Шифрування
+    if (strcmp(operation, "ENCODE") == 0) {
+        for (int i = 0; i < message_len; i++) {
+            // Зсув Цезаря з інкрементуючим зміщенням
+            char shifted = caesar_shift(message[i], pseudo_random_number + i);
+
+            // Проходження через три ротори
+            char after_rotor1 = substitute(shifted, rotor1);
+            char after_rotor2 = substitute(after_rotor1, rotor2);
+            char after_rotor3 = substitute(after_rotor2, rotor3);
+
+            result[i] = after_rotor3;
+        }
+    }
+    
+    // Дешифрування
+    else if (strcmp(operation, "DECODE") == 0) {
+        for (int i = 0; i < message_len; i++) {
+            // Зворотне проходження через ротори
+            char after_rotor3 = reverse_substitute(message[i], rotor3);
+            char after_rotor2 = reverse_substitute(after_rotor3, rotor2);
+            char after_rotor1 = reverse_substitute(after_rotor2, rotor1);
+
+            // Зворотній зсув Цезаря
+            result[i] = reverse_caesar_shift(after_rotor1, (pseudo_random_number + i) % ALPHABET_SIZE);
+        }
+    }
+
+    result[message_len] = '\0';  // Закінчення рядка
+
+    printf("%s\n", result);  // Виведення результату
+
+    return 0;
+}
